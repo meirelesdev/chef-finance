@@ -906,3 +906,232 @@ html.modal-open {
   }
 }
 
+/* ============================================
+   TUTORIAL INTERATIVO
+   ============================================ */
+
+/* Overlay do Tutorial */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  animation: tutorialFadeIn 0.3s ease-out;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tutorial-overlay.tutorial-closing {
+  animation: tutorialFadeOut 0.3s ease-out;
+}
+
+@keyframes tutorialFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tutorialFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Modal do Tutorial */
+.tutorial-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  max-width: 500px;
+  width: 100%;
+  max-height: calc(100vh - var(--spacing-lg) * 2);
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  position: relative;
+  animation: tutorialSlideUp 0.3s ease-out;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tutorial-overlay.tutorial-closing .tutorial-modal {
+  animation: tutorialSlideDown 0.3s ease-out;
+}
+
+@keyframes tutorialSlideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes tutorialSlideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+}
+
+/* Barra de Progresso */
+.tutorial-progress {
+  width: 100%;
+  height: 4px;
+  background: var(--color-border-light);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+}
+
+.tutorial-progress-bar {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease-out;
+}
+
+/* Conteúdo do Tutorial */
+.tutorial-content {
+  margin-bottom: var(--spacing-xl);
+}
+
+.tutorial-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+.tutorial-body {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.tutorial-body p {
+  margin-bottom: var(--spacing-sm);
+}
+
+.tutorial-body ul,
+.tutorial-body ol {
+  display: inline-block;
+  text-align: left;
+}
+
+.tutorial-body li {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Indicador de Passos */
+.tutorial-steps-indicator {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
+}
+
+.tutorial-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  transition: all var(--transition-fast);
+}
+
+.tutorial-step-dot.active {
+  background: var(--color-primary);
+  width: 24px;
+  border-radius: var(--radius-full);
+}
+
+/* Rodapé do Tutorial */
+.tutorial-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.tutorial-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.tutorial-actions .btn {
+  flex: 1;
+  min-width: 120px;
+}
+
+.tutorial-btn-skip {
+  order: -1;
+  width: 100%;
+}
+
+/* Destaque de Elementos */
+.tutorial-highlight {
+  position: relative;
+  z-index: 9999;
+  outline: 3px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+  animation: tutorialPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.7);
+}
+
+@keyframes tutorialPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(233, 30, 99, 0);
+  }
+}
+
+/* Previne scroll do body quando tutorial está aberto */
+body.tutorial-open {
+  overflow: hidden !important;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .tutorial-modal {
+    padding: var(--spacing-lg);
+    max-height: calc(100vh - var(--spacing-md) * 2);
+  }
+
+  .tutorial-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .tutorial-actions {
+    flex-direction: column;
+  }
+
+  .tutorial-actions .btn {
+    width: 100%;
+  }
+
+  .tutorial-btn-skip {
+    order: 0;
+  }
+}
+

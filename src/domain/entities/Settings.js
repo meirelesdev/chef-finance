@@ -17,20 +17,24 @@ class Settings {
     contractorRepresentative = DEFAULT_VALUES.CONTRACTOR_REPRESENTATIVE,
     contractorCPF = DEFAULT_VALUES.CONTRACTOR_CPF,
     contractorPixKey = DEFAULT_VALUES.CONTRACTOR_PIX_KEY,
-    contractorEmails = DEFAULT_VALUES.CONTRACTOR_EMAILS
+    contractorEmails = DEFAULT_VALUES.CONTRACTOR_EMAILS,
+    skipContractorValidation = false
   ) {
     this._validateRateKm(rateKm);
     this._validateDefaultReimbursementDays(defaultReimbursementDays);
     this._validateMaxHotelRate(maxHotelRate);
     this._validateStandardDailyRate(standardDailyRate);
     this._validateOvertimeRate(overtimeRate);
-    this._validateContractorName(contractorName);
-    this._validateContractorCNPJ(contractorCNPJ);
-    this._validateContractorAddress(contractorAddress);
-    this._validateContractorRepresentative(contractorRepresentative);
-    this._validateContractorCPF(contractorCPF);
-    this._validateContractorPixKey(contractorPixKey);
-    this._validateContractorEmails(contractorEmails);
+    
+    if (!skipContractorValidation) {
+      this._validateContractorName(contractorName);
+      this._validateContractorCNPJ(contractorCNPJ);
+      this._validateContractorAddress(contractorAddress);
+      this._validateContractorRepresentative(contractorRepresentative);
+      this._validateContractorCPF(contractorCPF);
+      this._validateContractorPixKey(contractorPixKey);
+      this._validateContractorEmails(contractorEmails);
+    }
 
     this.rateKm = rateKm;
     this.defaultReimbursementDays = defaultReimbursementDays;
@@ -340,7 +344,7 @@ class Settings {
    * - maxHotelRate: R$ 280,00 teto para hospedagem
    * - standardDailyRate: R$ 300,00 diária técnica padrão
    * - overtimeRate: R$ 75,00 por hora extra (trabalho + tempo de viagem)
-   * - Dados da CONTRATADA conforme contrato
+   * - Dados da CONTRATADA: valores vazios (devem ser configurados pelo usuário)
    */
   static createDefault() {
     return new Settings(
@@ -355,7 +359,8 @@ class Settings {
       DEFAULT_VALUES.CONTRACTOR_REPRESENTATIVE,
       DEFAULT_VALUES.CONTRACTOR_CPF,
       DEFAULT_VALUES.CONTRACTOR_PIX_KEY,
-      DEFAULT_VALUES.CONTRACTOR_EMAILS
+      DEFAULT_VALUES.CONTRACTOR_EMAILS,
+      true // Skip validation para permitir valores vazios na criação inicial
     );
   }
 

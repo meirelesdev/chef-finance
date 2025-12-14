@@ -49,6 +49,8 @@ import { ExportTransactionsToCSV } from './application/use-cases/data/ExportTran
 // Presentation Layer
 import { App } from './presentation/App.js';
 import { toast } from './presentation/utils/Toast.js';
+import { TutorialView } from './presentation/views/TutorialView.js';
+import { TutorialService } from './domain/services/TutorialService.js';
 
 // ============================================
 // 2. INSTÂNCIA DOS REPOSITÓRIOS
@@ -140,7 +142,7 @@ const exportTransactionsToCSV = new ExportTransactionsToCSV(eventRepository, tra
 // ============================================
 
 // Aguarda o DOM estar pronto
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Objeto com todas as dependências para a App
     const dependencies = {
@@ -171,6 +173,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Torna toast disponível globalmente
     window.toast = toast;
+
+    // Verifica se é primeiro acesso e exibe tutorial
+    const tutorialService = new TutorialService();
+    const hasSettings = await settingsRepository.exists();
+    
+    if (tutorialService.isFirstAccess(hasSettings)) {
+      // Aguarda um pouco para garantir que a UI está renderizada
+      setTimeout(() => {
+        const tutorialView = new TutorialView(tutorialService, () => {
+          // Callback quando tutorial é concluído
+          window.toast.success('Bem-vindo ao Chef Finance! Configure seus dados em Ajustes.');
+        });
+        tutorialView.render();
+      }, 500);
+    }
     
     // Registrar Service Worker para PWA
     if ('serviceWorker' in navigator) {
