@@ -193,11 +193,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         // Detecta o caminho base (para funcionar tanto localmente quanto no GitHub Pages)
-        const basePath = window.location.pathname.includes('/control-gi-mendes/') 
-          ? '/control-gi-mendes/sw.js' 
+        const basePath = window.location.pathname.includes('/chef-finance/') 
+          ? '/chef-finance/sw.js' 
           : '/sw.js';
         
-        navigator.serviceWorker.register(basePath, { scope: '/control-gi-mendes/' })
+        const scope = window.location.pathname.includes('/chef-finance/')
+          ? '/chef-finance/'
+          : '/';
+        
+        navigator.serviceWorker.register(basePath, { scope })
           .then((registration) => {
             // Verifica atualizações do service worker
             registration.addEventListener('updatefound', () => {
