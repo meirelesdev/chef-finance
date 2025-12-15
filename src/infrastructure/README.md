@@ -20,7 +20,7 @@ src/infrastructure/
 
 Implementa `SettingsRepository` usando `localStorage`.
 
-**Chave de armazenamento**: `gi_financas_settings`
+**Chave de armazenamento**: `chef_finance_settings`
 
 **Métodos:**
 - `save(settings)` - Salva configurações no localStorage
@@ -35,7 +35,7 @@ Implementa `SettingsRepository` usando `localStorage`.
 
 Implementa `EventRepository` usando `localStorage`.
 
-**Chave de armazenamento**: `gi_financas_events`
+**Chave de armazenamento**: `chef_finance_events`
 
 **Métodos principais:**
 - `save(event)` - Salva evento
@@ -68,7 +68,7 @@ Implementa `EventRepository` usando `localStorage`.
 
 Implementa `TransactionRepository` usando `localStorage`.
 
-**Chave de armazenamento**: `gi_financas_transactions`
+**Chave de armazenamento**: `chef_finance_transactions`
 
 **Métodos principais:**
 - `save(transaction)` - Salva transação

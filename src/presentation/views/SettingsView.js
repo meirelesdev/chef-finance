@@ -29,7 +29,21 @@ class SettingsView {
         await this.settingsRepository.save(settings);
       }
 
+      const isComplete = settings.isComplete();
+
       container.innerHTML = `
+        ${!isComplete ? `
+        <div class="card" style="border-left: 4px solid var(--color-warning); background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);">
+          <h2 style="color: var(--color-warning); margin-bottom: var(--spacing-md);">⚠️ Configuração Incompleta</h2>
+          <p style="margin-bottom: var(--spacing-md); font-weight: var(--font-weight-medium);">
+            Para usar o sistema, você precisa preencher <strong>todos</strong> os campos abaixo.
+          </p>
+          <p style="margin: 0; font-size: 0.9em; color: var(--color-text-secondary);">
+            Os campos marcados com <span style="color: var(--color-danger);">*</span> são obrigatórios.
+          </p>
+        </div>
+        ` : ''}
+        
         <div class="card">
           <h2>Configurações</h2>
           <p class="text-muted">Configure os valores padrão do sistema</p>
@@ -82,51 +96,67 @@ class SettingsView {
             </p>
 
             <div class="form-group">
-              <label class="form-label">Razão Social</label>
-              <input type="text" class="form-input" id="settings-contractor-name" 
-                     value="${settings.contractorName || DEFAULT_VALUES.CONTRACTOR_NAME}" required>
+              <label class="form-label">Razão Social <span style="color: var(--color-danger);">*</span></label>
+              <input type="text" class="form-input ${!isComplete && (!settings.contractorName || settings.contractorName.trim() === '') ? 'input-required' : ''}" 
+                     id="settings-contractor-name" 
+                     value="${settings.contractorName || DEFAULT_VALUES.CONTRACTOR_NAME}" 
+                     placeholder="Ex: 28.065.604 GISELE MENDES"
+                     required>
               <small class="text-muted">Nome completo da empresa (CNPJ)</small>
             </div>
 
             <div class="form-group">
-              <label class="form-label">CNPJ</label>
-              <input type="text" class="form-input" id="settings-contractor-cnpj" 
+              <label class="form-label">CNPJ <span style="color: var(--color-danger);">*</span></label>
+              <input type="text" class="form-input ${!isComplete && (!settings.contractorCNPJ || settings.contractorCNPJ.trim() === '') ? 'input-required' : ''}" 
+                     id="settings-contractor-cnpj" 
                      placeholder="XX.XXX.XXX/XXXX-XX" 
                      value="${settings.contractorCNPJ || DEFAULT_VALUES.CONTRACTOR_CNPJ}" required>
               <small class="text-muted">CNPJ no formato XX.XXX.XXX/XXXX-XX</small>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Endereço Completo</label>
-              <textarea class="form-input" id="settings-contractor-address" rows="3" required>${settings.contractorAddress || DEFAULT_VALUES.CONTRACTOR_ADDRESS}</textarea>
+              <label class="form-label">Endereço Completo <span style="color: var(--color-danger);">*</span></label>
+              <textarea class="form-input ${!isComplete && (!settings.contractorAddress || settings.contractorAddress.trim() === '') ? 'input-required' : ''}" 
+                        id="settings-contractor-address" 
+                        rows="3" 
+                        placeholder="Ex: Rua Exemplo, n° 123, Bairro, Cidade - UF, CEP: 12345-678"
+                        required>${settings.contractorAddress || DEFAULT_VALUES.CONTRACTOR_ADDRESS}</textarea>
               <small class="text-muted">Endereço completo da empresa</small>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Representante</label>
-              <input type="text" class="form-input" id="settings-contractor-representative" 
-                     value="${settings.contractorRepresentative || DEFAULT_VALUES.CONTRACTOR_REPRESENTATIVE}" required>
+              <label class="form-label">Representante <span style="color: var(--color-danger);">*</span></label>
+              <input type="text" class="form-input ${!isComplete && (!settings.contractorRepresentative || settings.contractorRepresentative.trim() === '') ? 'input-required' : ''}" 
+                     id="settings-contractor-representative" 
+                     value="${settings.contractorRepresentative || DEFAULT_VALUES.CONTRACTOR_REPRESENTATIVE}" 
+                     placeholder="Ex: GISELE MENDES"
+                     required>
               <small class="text-muted">Nome do representante legal</small>
             </div>
 
             <div class="form-group">
-              <label class="form-label">CPF do Representante</label>
-              <input type="text" class="form-input" id="settings-contractor-cpf" 
+              <label class="form-label">CPF do Representante <span style="color: var(--color-danger);">*</span></label>
+              <input type="text" class="form-input ${!isComplete && (!settings.contractorCPF || settings.contractorCPF.trim() === '') ? 'input-required' : ''}" 
+                     id="settings-contractor-cpf" 
                      placeholder="XXX.XXX.XXX-XX" 
                      value="${settings.contractorCPF || DEFAULT_VALUES.CONTRACTOR_CPF}" required>
               <small class="text-muted">CPF no formato XXX.XXX.XXX-XX</small>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Chave PIX</label>
-              <input type="text" class="form-input" id="settings-contractor-pix-key" 
-                     value="${settings.contractorPixKey || DEFAULT_VALUES.CONTRACTOR_PIX_KEY}" required>
+              <label class="form-label">Chave PIX <span style="color: var(--color-danger);">*</span></label>
+              <input type="text" class="form-input ${!isComplete && (!settings.contractorPixKey || settings.contractorPixKey.trim() === '') ? 'input-required' : ''}" 
+                     id="settings-contractor-pix-key" 
+                     value="${settings.contractorPixKey || DEFAULT_VALUES.CONTRACTOR_PIX_KEY}" 
+                     placeholder="Ex: 48988321351 ou email@exemplo.com"
+                     required>
               <small class="text-muted">Chave PIX para recebimento (celular, e-mail ou chave aleatória)</small>
             </div>
 
             <div class="form-group">
-              <label class="form-label">E-mails para Envio de NF</label>
-              <input type="text" class="form-input" id="settings-contractor-emails" 
+              <label class="form-label">E-mails para Envio de NF <span style="color: var(--color-danger);">*</span></label>
+              <input type="text" class="form-input ${!isComplete && (!settings.contractorEmails || settings.contractorEmails.trim() === '') ? 'input-required' : ''}" 
+                     id="settings-contractor-emails" 
                      placeholder="email1@exemplo.com, email2@exemplo.com" 
                      value="${settings.contractorEmails || DEFAULT_VALUES.CONTRACTOR_EMAILS}" required>
               <small class="text-muted">E-mails separados por vírgula para envio de notas fiscais</small>
@@ -252,7 +282,20 @@ class SettingsView {
     });
 
     if (result.success) {
-      window.toast.success('Configurações salvas com sucesso!');
+      // Verifica se agora está completo
+      const updatedSettings = await this.settingsRepository.find();
+      const isNowComplete = updatedSettings && updatedSettings.isComplete();
+      
+      if (isNowComplete) {
+        window.toast.success('Configurações salvas com sucesso! O sistema está pronto para uso.');
+        // Recarrega a view para remover o aviso
+        setTimeout(() => {
+          this.render();
+        }, 1500);
+      } else {
+        window.toast.warning('Configurações salvas, mas ainda faltam campos obrigatórios.');
+      }
+      
       // Mostra feedback visual
       const btn = document.querySelector('#form-settings button[type="submit"]');
       const originalText = btn.textContent;
@@ -318,7 +361,7 @@ class SettingsView {
       // Gera nome do arquivo com data
       const date = new Date();
       const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
-      const filename = `backup_gi_financas_${dateStr}.json`;
+      const filename = `backup_chef_finance_${dateStr}.json`;
 
       // Cria blob e faz download
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -427,7 +470,7 @@ class SettingsView {
       // Gera nome do arquivo com data
       const date = new Date();
       const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
-      const filename = `transacoes_gi_financas_${dateStr}.csv`;
+      const filename = `transacoes_chef_finance_${dateStr}.csv`;
 
       // Cria blob e faz download
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM para Excel

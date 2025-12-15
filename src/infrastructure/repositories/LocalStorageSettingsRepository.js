@@ -7,7 +7,7 @@ import { Settings } from '../../domain/entities/Settings.js';
 class LocalStorageSettingsRepository extends SettingsRepository {
   constructor() {
     super();
-    this.storageKey = 'gi_financas_settings';
+    this.storageKey = 'chef_finance_settings';
   }
 
   /**

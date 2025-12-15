@@ -52,6 +52,9 @@ import { toast } from './presentation/utils/Toast.js';
 import { TutorialView } from './presentation/views/TutorialView.js';
 import { TutorialService } from './domain/services/TutorialService.js';
 
+// Infrastructure Utils
+import { MigrationService } from './infrastructure/utils/MigrationService.js';
+
 // ============================================
 // 2. INSTÂNCIA DOS REPOSITÓRIOS
 // ============================================
@@ -173,6 +176,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Torna toast disponível globalmente
     window.toast = toast;
+
+    // Executa migração de dados (se necessário)
+    const migrationService = new MigrationService();
+    if (migrationService.hasOldData()) {
+      const migrationResult = await migrationService.migrate();
+      if (migrationResult.migratedCount > 0) {
+        console.log(`✅ Migração concluída: ${migrationResult.migratedCount} chave(s) migrada(s)`);
+      }
+    }
 
     // Verifica se é primeiro acesso e exibe tutorial
     const tutorialService = new TutorialService();

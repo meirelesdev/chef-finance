@@ -7,7 +7,7 @@ import { Transaction } from '../../domain/entities/Transaction.js';
 class LocalStorageTransactionRepository extends TransactionRepository {
   constructor() {
     super();
-    this.storageKey = 'gi_financas_transactions';
+    this.storageKey = 'chef_finance_transactions';
   }
 
   /**

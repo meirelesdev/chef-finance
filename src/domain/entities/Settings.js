@@ -373,6 +373,16 @@ class Settings {
     if (!data) {
       return Settings.createDefault();
     }
+    
+    // Verifica se os dados do contratante estão vazios (configuração inicial)
+    const hasEmptyContractorData = !data.contractorName || 
+                                   !data.contractorCNPJ || 
+                                   !data.contractorAddress ||
+                                   !data.contractorRepresentative ||
+                                   !data.contractorCPF ||
+                                   !data.contractorPixKey ||
+                                   !data.contractorEmails;
+    
     return new Settings(
       data.rateKm !== undefined ? data.rateKm : DEFAULT_VALUES.KM_RATE,
       data.defaultReimbursementDays !== undefined ? data.defaultReimbursementDays : DEFAULT_VALUES.DEFAULT_REIMBURSEMENT_DAYS,
@@ -385,7 +395,31 @@ class Settings {
       data.contractorRepresentative !== undefined ? data.contractorRepresentative : DEFAULT_VALUES.CONTRACTOR_REPRESENTATIVE,
       data.contractorCPF !== undefined ? data.contractorCPF : DEFAULT_VALUES.CONTRACTOR_CPF,
       data.contractorPixKey !== undefined ? data.contractorPixKey : DEFAULT_VALUES.CONTRACTOR_PIX_KEY,
-      data.contractorEmails !== undefined ? data.contractorEmails : DEFAULT_VALUES.CONTRACTOR_EMAILS
+      data.contractorEmails !== undefined ? data.contractorEmails : DEFAULT_VALUES.CONTRACTOR_EMAILS,
+      hasEmptyContractorData // Skip validation se dados do contratante estiverem vazios
+    );
+  }
+
+  /**
+   * Verifica se as configurações estão completas (todos os campos obrigatórios preenchidos)
+   * @returns {boolean} - True se completo, false caso contrário
+   */
+  isComplete() {
+    return !!(
+      this.contractorName && 
+      this.contractorName.trim() !== '' &&
+      this.contractorCNPJ && 
+      this.contractorCNPJ.trim() !== '' &&
+      this.contractorAddress && 
+      this.contractorAddress.trim() !== '' &&
+      this.contractorRepresentative && 
+      this.contractorRepresentative.trim() !== '' &&
+      this.contractorCPF && 
+      this.contractorCPF.trim() !== '' &&
+      this.contractorPixKey && 
+      this.contractorPixKey.trim() !== '' &&
+      this.contractorEmails && 
+      this.contractorEmails.trim() !== ''
     );
   }
 }

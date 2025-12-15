@@ -10,7 +10,7 @@ import { Event } from '../../domain/entities/Event.js';
 class LocalStorageEventRepository extends EventRepository {
   constructor(transactionRepository = null) {
     super();
-    this.storageKey = 'gi_financas_events';
+    this.storageKey = 'chef_finance_events';
     this.transactionRepository = transactionRepository;
   }
 

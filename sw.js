@@ -3,7 +3,7 @@
  * Permite funcionamento offline e instalação como PWA
  */
 
-const CACHE_NAME = 'chef-finance-v3'; // Atualizado para sistema genérico
+const CACHE_NAME = 'chef-finance-v4'; // Atualizado para tutorial melhorado
 // Base path para GitHub Pages
 const BASE_PATH = '/chef-finance';
 

@@ -45,7 +45,19 @@ class App {
     // Event listener para FAB (Novo Evento)
     const fabNewEvent = document.getElementById('fab-new-event');
     if (fabNewEvent) {
-      fabNewEvent.addEventListener('click', () => {
+      fabNewEvent.addEventListener('click', async () => {
+        // Verifica se configurações estão completas antes de permitir criar evento
+        const settings = await this.dependencies.settingsRepository.find();
+        const isSettingsComplete = settings && settings.isComplete();
+        
+        if (!isSettingsComplete) {
+          if (window.toast) {
+            window.toast.warning('Configure seus dados em Ajustes antes de criar eventos.');
+          }
+          this.navigateTo('settings');
+          return;
+        }
+        
         // Dispara evento customizado para criar novo evento
         window.dispatchEvent(new CustomEvent('create-new-event'));
       });
@@ -119,6 +131,38 @@ class App {
       updateTransaction,
       deleteEvent
     } = this.dependencies;
+
+    // Verifica se as configurações estão completas
+    const settings = await settingsRepository.find();
+    const isSettingsComplete = settings && settings.isComplete();
+
+    // Se não estiver completo e não estiver na tela de configurações, bloqueia acesso
+    if (!isSettingsComplete && this.currentView !== 'settings') {
+      const content = document.getElementById('dashboard-content');
+      if (content) {
+        content.classList.add('active');
+        content.innerHTML = `
+          <div class="card" style="border-left: 4px solid var(--color-warning); background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);">
+            <h2 style="color: var(--color-warning); margin-bottom: var(--spacing-md);">⚠️ Configuração Necessária</h2>
+            <p style="margin-bottom: var(--spacing-lg); font-size: 1.05em;">
+              Para usar o sistema, você precisa configurar seus dados primeiro.
+            </p>
+            <p style="margin-bottom: var(--spacing-lg);">
+              Clique no botão abaixo para ir para <strong>Ajustes</strong> e preencher todas as informações obrigatórias.
+            </p>
+            <button class="btn btn-primary btn-lg" style="width: 100%;" id="btn-go-to-settings">
+              ⚙️ Ir para Configurações
+            </button>
+          </div>
+        `;
+        
+        // Event listener para o botão
+        document.getElementById('btn-go-to-settings').addEventListener('click', () => {
+          this.navigateTo('settings');
+        });
+      }
+      return;
+    }
 
     if (this.currentView === 'dashboard') {
       const dashboardView = new DashboardView(

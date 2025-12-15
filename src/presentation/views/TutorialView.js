@@ -33,15 +33,20 @@ class TutorialView {
         highlight: '#fab-new-event'
       },
       {
-        title: '⚙️ Configurações',
+        title: '⚙️ Configuração Obrigatória',
         content: `
-          <p>Na aba <strong>Ajustes</strong>, configure:</p>
+          <p><strong style="color: var(--color-primary); font-size: 1.1em;">⚠️ ATENÇÃO!</strong></p>
+          <p>Antes de usar o sistema, você <strong>DEVE</strong> configurar seus dados em <strong>Ajustes</strong>:</p>
           <ul style="text-align: left; margin: var(--spacing-md) 0;">
-            <li>Valores de KM e diárias</li>
-            <li>Dados da sua empresa (CNPJ, endereço, etc.)</li>
-            <li>Chave PIX para recebimentos</li>
+            <li>📋 <strong>Dados da sua empresa:</strong> Razão Social, CNPJ, Endereço</li>
+            <li>👤 <strong>Dados do representante:</strong> Nome e CPF</li>
+            <li>💰 <strong>Chave PIX</strong> para recebimentos</li>
+            <li>📧 <strong>E-mails</strong> para envio de notas fiscais</li>
+            <li>💵 <strong>Valores:</strong> Taxa por KM, diárias, etc.</li>
           </ul>
-          <p><strong>Importante:</strong> Configure seus dados antes de criar eventos!</p>
+          <p style="background: var(--color-warning-light); padding: var(--spacing-md); border-radius: var(--radius-md); margin-top: var(--spacing-md);">
+            <strong>O sistema não funcionará até que você complete a configuração!</strong>
+          </p>
         `,
         highlight: '.bottom-nav-item[data-view="settings"]'
       },
@@ -67,17 +72,14 @@ class TutorialView {
         highlight: null
       },
       {
-        title: '✅ Pronto para Começar!',
+        title: '🚀 Próximo Passo: Configurar!',
         content: `
-          <p>Agora você já conhece o básico do sistema!</p>
-          <p><strong>Próximos passos:</strong></p>
-          <ol style="text-align: left; margin: var(--spacing-md) 0;">
-            <li>Configure seus dados em <strong>Ajustes</strong></li>
-            <li>Crie seu primeiro evento</li>
-            <li>Adicione despesas e receitas</li>
-            <li>Gere relatórios quando necessário</li>
-          </ol>
-          <p>Boa sorte! 🍰</p>
+          <p>Agora você conhece o sistema!</p>
+          <p style="background: var(--color-primary-light); padding: var(--spacing-lg); border-radius: var(--radius-md); margin: var(--spacing-md) 0;">
+            <strong style="font-size: 1.1em;">Vamos configurar seus dados agora?</strong>
+          </p>
+          <p>Após concluir o tutorial, você será direcionado para a tela de <strong>Ajustes</strong>.</p>
+          <p>Preencha todos os campos obrigatórios para começar a usar o sistema!</p>
         `,
         highlight: null
       }
@@ -115,14 +117,14 @@ class TutorialView {
     const progress = ((this.currentStep + 1) / this.steps.length) * 100;
 
     return `
-      <div class="tutorial-modal">
+      <div class="tutorial-modal" style="max-width: 320px; width: calc(100% - 32px); padding: 16px; margin-top: 20px;">
         <div class="tutorial-progress">
           <div class="tutorial-progress-bar" style="width: ${progress}%"></div>
         </div>
         
         <div class="tutorial-content">
-          <h2 class="tutorial-title">${step.title}</h2>
-          <div class="tutorial-body">
+          <h2 class="tutorial-title" style="font-size: 18px; margin-bottom: 12px;">${step.title}</h2>
+          <div class="tutorial-body" style="font-size: 14px;">
             ${step.content}
           </div>
         </div>
@@ -238,10 +240,22 @@ class TutorialView {
    * @private
    */
   _highlightElement() {
-    // Remove destaque anterior
+    // Remove destaque anterior e cutout
     document.querySelectorAll('.tutorial-highlight').forEach(el => {
       el.classList.remove('tutorial-highlight');
+      el.style.zIndex = '';
+      el.style.position = '';
+      el.style.filter = '';
     });
+    
+    // Remove cutout anterior do overlay
+    const overlay = document.getElementById('tutorial-overlay');
+    if (overlay) {
+      const existingCutout = overlay.querySelector('.tutorial-cutout');
+      if (existingCutout) {
+        existingCutout.remove();
+      }
+    }
 
     const step = this.steps[this.currentStep];
     if (step.highlight) {
@@ -249,8 +263,63 @@ class TutorialView {
       if (element) {
         element.classList.add('tutorial-highlight');
         
+        // Calcula posição do elemento para criar cutout
+        const rect = element.getBoundingClientRect();
+        const padding = 8; // Espaço extra ao redor do elemento
+        
+        // Cria um cutout no overlay para deixar o elemento visível
+        if (overlay) {
+          const cutout = document.createElement('div');
+          cutout.className = 'tutorial-cutout';
+          cutout.style.cssText = `
+            position: absolute;
+            top: ${rect.top - padding}px;
+            left: ${rect.left - padding}px;
+            width: ${rect.width + (padding * 2)}px;
+            height: ${rect.height + (padding * 2)}px;
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 9999;
+          `;
+          overlay.appendChild(cutout);
+        }
+        
+        // Aplica estilos inline para garantir que apareça acima do overlay
+        element.style.zIndex = '10001';
+        element.style.position = 'relative';
+        element.style.filter = 'brightness(1.2)';
+        
+        // Para elementos fixos, usa fixed
+        const computedStyle = window.getComputedStyle(element);
+        if (computedStyle.position === 'fixed') {
+          element.style.position = 'fixed';
+          element.style.zIndex = '10002';
+        }
+        
         // Scroll suave para o elemento
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest',
+            inline: 'nearest'
+          });
+          
+          // Atualiza cutout após scroll
+          setTimeout(() => {
+            const newRect = element.getBoundingClientRect();
+            const cutout = overlay?.querySelector('.tutorial-cutout');
+            if (cutout) {
+              cutout.style.top = `${newRect.top - padding}px`;
+              cutout.style.left = `${newRect.left - padding}px`;
+              cutout.style.width = `${newRect.width + (padding * 2)}px`;
+              cutout.style.height = `${newRect.height + (padding * 2)}px`;
+            }
+            
+            element.style.zIndex = computedStyle.position === 'fixed' ? '10002' : '10001';
+            element.style.position = computedStyle.position === 'fixed' ? 'fixed' : 'relative';
+          }, 300);
+        }, 100);
       }
     }
   }
@@ -272,6 +341,12 @@ class TutorialView {
     if (this.onComplete) {
       this.onComplete();
     }
+    // Redireciona para configurações após tutorial
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('navigate', {
+        detail: { view: 'settings' }
+      }));
+    }, 300);
   }
 
   /**
@@ -286,10 +361,19 @@ class TutorialView {
         overlay.remove();
         document.body.classList.remove('tutorial-open');
         
-        // Remove destaque
+        // Remove destaque e estilos inline
         document.querySelectorAll('.tutorial-highlight').forEach(el => {
           el.classList.remove('tutorial-highlight');
+          el.style.zIndex = '';
+          el.style.position = '';
+          el.style.filter = '';
         });
+        
+        // Remove cutout
+        const cutout = document.querySelector('.tutorial-cutout');
+        if (cutout) {
+          cutout.remove();
+        }
       }, 300);
     }
   }
