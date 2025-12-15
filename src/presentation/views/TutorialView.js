@@ -246,7 +246,18 @@ class TutorialView {
       el.style.zIndex = '';
       el.style.position = '';
       el.style.filter = '';
+      el.style.transform = '';
+      el.style.background = '';
+      el.style.borderRadius = '';
+      el.style.padding = '';
     });
+    
+    // Restaura bottom-nav ao estado normal
+    const bottomNav = document.querySelector('.bottom-nav');
+    if (bottomNav) {
+      bottomNav.style.zIndex = '';
+      bottomNav.style.position = '';
+    }
     
     // Remove cutout anterior do overlay
     const overlay = document.getElementById('tutorial-overlay');
@@ -259,69 +270,207 @@ class TutorialView {
 
     const step = this.steps[this.currentStep];
     if (step.highlight) {
-      const element = document.querySelector(step.highlight);
+      this._findAndHighlightElement(step.highlight, overlay);
+    }
+  }
+
+  /**
+   * Encontra e destaca o elemento
+   * @private
+   */
+  _findAndHighlightElement(selector, overlay) {
+    // Determina seletores de fallback baseado no seletor original
+    let selectors = [selector]; // Tenta o seletor original primeiro
+    
+    if (selector === '#fab-new-event' || selector.includes('fab')) {
+      // Para FAB, tenta variações
+      selectors = [
+        '#fab-new-event',
+        '.fab',
+        'button#fab-new-event',
+        'button.fab'
+      ];
+    } else if (selector.includes('settings')) {
+      // Para botão de ajustes, tenta variações
+      selectors = [
+        selector,
+        'button[data-view="settings"]',
+        '.bottom-nav-item[data-view="settings"]',
+        '.bottom-nav-item[aria-label="Ajustes"]',
+        '.bottom-nav button:last-child',
+        'nav.bottom-nav button:last-child',
+        '.bottom-nav .bottom-nav-item:last-child',
+        'button.bottom-nav-item:last-of-type'
+      ];
+    }
+    
+    // Tenta encontrar o elemento
+    let element = null;
+    for (const sel of selectors) {
+      element = document.querySelector(sel);
       if (element) {
-        element.classList.add('tutorial-highlight');
-        
-        // Calcula posição do elemento para criar cutout
-        const rect = element.getBoundingClientRect();
-        const padding = 8; // Espaço extra ao redor do elemento
-        
-        // Cria um cutout no overlay para deixar o elemento visível
-        if (overlay) {
-          const cutout = document.createElement('div');
-          cutout.className = 'tutorial-cutout';
-          cutout.style.cssText = `
-            position: absolute;
-            top: ${rect.top - padding}px;
-            left: ${rect.left - padding}px;
-            width: ${rect.width + (padding * 2)}px;
-            height: ${rect.height + (padding * 2)}px;
-            border-radius: 12px;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-            pointer-events: none;
-            z-index: 9999;
-          `;
-          overlay.appendChild(cutout);
+        console.log('✅ Elemento encontrado com seletor:', sel);
+        break;
+      }
+    }
+    
+    // Se encontrou, aplica o destaque
+    if (element) {
+      this._applyHighlight(element, overlay);
+      return;
+    }
+    
+    // Se não encontrou, usa MutationObserver para detectar quando aparecer
+    console.warn('⚠️ Elemento não encontrado, aguardando aparecer no DOM...', selector);
+    const observer = new MutationObserver((mutations, obs) => {
+      for (const sel of selectors) {
+        const found = document.querySelector(sel);
+        if (found) {
+          console.log('✅ Elemento encontrado após observer:', sel);
+          obs.disconnect();
+          this._applyHighlight(found, overlay);
+          return;
         }
-        
-        // Aplica estilos inline para garantir que apareça acima do overlay
-        element.style.zIndex = '10001';
+      }
+    });
+    
+    // Observa mudanças no body e na bottom-nav
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    // Timeout de segurança (para não ficar observando para sempre)
+    setTimeout(() => {
+      observer.disconnect();
+      let finalElement = null;
+      for (const sel of selectors) {
+        finalElement = document.querySelector(sel);
+        if (finalElement) break;
+      }
+      
+      if (finalElement) {
+        console.log('✅ Elemento encontrado no timeout final');
+        this._applyHighlight(finalElement, overlay);
+      } else {
+        console.error('❌ Elemento não encontrado após observer:', selector);
+      }
+    }, 1000);
+  }
+
+  /**
+   * Aplica o destaque ao elemento
+   * @private
+   */
+  _applyHighlight(element, overlay) {
+    if (!element) return;
+    
+    // Garante que o elemento está visível
+    element.style.display = '';
+    element.style.visibility = 'visible';
+    element.style.opacity = '1';
+    
+    element.classList.add('tutorial-highlight');
+    
+    // Identifica o tipo de elemento
+    const isFAB = element.id === 'fab-new-event' || element.classList.contains('fab');
+    const isBottomNavItem = element.closest('.bottom-nav') && !isFAB;
+    const computedStyle = window.getComputedStyle(element);
+    const isFixed = computedStyle.position === 'fixed' || isFAB;
+    
+    // Aguarda um frame para garantir que o elemento está renderizado
+    requestAnimationFrame(() => {
+      // Calcula posição do elemento para criar cutout
+      const rect = element.getBoundingClientRect();
+      const padding = isFAB ? 16 : 12; // Mais padding para FAB
+      
+      // Verifica se o elemento tem dimensões válidas
+      if (rect.width === 0 || rect.height === 0) {
+        console.warn('⚠️ Elemento tem dimensões zero, tentando novamente:', element);
+        setTimeout(() => this._applyHighlight(element, overlay), 100);
+        return;
+      }
+    
+      // Cria um cutout no overlay para deixar o elemento visível
+      if (overlay) {
+        const cutout = document.createElement('div');
+        cutout.className = 'tutorial-cutout';
+        cutout.style.cssText = `
+          position: fixed;
+          top: ${rect.top - padding}px;
+          left: ${rect.left - padding}px;
+          width: ${rect.width + (padding * 2)}px;
+          height: ${rect.height + (padding * 2)}px;
+          border-radius: ${isFAB ? '50%' : '12px'};
+          box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+          pointer-events: none;
+          z-index: 9999;
+        `;
+        overlay.appendChild(cutout);
+      }
+      
+      // Aplica estilos para garantir que apareça acima do overlay
+      if (isFAB) {
+        // FAB é fixo e precisa aparecer acima de tudo, mantendo centralização
+        element.style.zIndex = '10002';
+        element.style.position = 'fixed';
+        element.style.left = '50%';
+        element.style.bottom = '35px';
+        element.style.transform = 'translateX(-50%) scale(1.1)';
+        element.style.filter = 'brightness(1.4) drop-shadow(0 0 30px rgba(233, 30, 99, 1))';
+        element.style.border = '4px solid rgba(233, 30, 99, 0.8)';
+        element.style.boxShadow = '0 0 0 4px rgba(233, 30, 99, 0.5), 0 0 0 8px rgba(233, 30, 99, 0.3), 0 8px 32px rgba(233, 30, 99, 0.6)';
+      } else if (isBottomNavItem) {
+        // Para elementos na bottom-nav, garante que a nav inteira apareça
+        const bottomNav = element.closest('.bottom-nav');
+        if (bottomNav) {
+          bottomNav.style.zIndex = '10001';
+          bottomNav.style.position = 'fixed';
+        }
+        element.style.zIndex = '10002';
         element.style.position = 'relative';
+        element.style.filter = 'brightness(1.3) drop-shadow(0 0 20px rgba(233, 30, 99, 0.9))';
+      } else {
+        // Elementos normais
+        element.style.zIndex = '10001';
+        element.style.position = isFixed ? 'fixed' : 'relative';
         element.style.filter = 'brightness(1.2)';
-        
-        // Para elementos fixos, usa fixed
-        const computedStyle = window.getComputedStyle(element);
-        if (computedStyle.position === 'fixed') {
-          element.style.position = 'fixed';
-          element.style.zIndex = '10002';
-        }
-        
-        // Scroll suave para o elemento
+      }
+      
+      // Scroll suave para o elemento (mas não para elementos fixos)
+      if (!isFixed && !isBottomNavItem) {
         setTimeout(() => {
           element.scrollIntoView({ 
             behavior: 'smooth', 
             block: 'nearest',
             inline: 'nearest'
           });
-          
-          // Atualiza cutout após scroll
-          setTimeout(() => {
-            const newRect = element.getBoundingClientRect();
-            const cutout = overlay?.querySelector('.tutorial-cutout');
-            if (cutout) {
-              cutout.style.top = `${newRect.top - padding}px`;
-              cutout.style.left = `${newRect.left - padding}px`;
-              cutout.style.width = `${newRect.width + (padding * 2)}px`;
-              cutout.style.height = `${newRect.height + (padding * 2)}px`;
-            }
-            
-            element.style.zIndex = computedStyle.position === 'fixed' ? '10002' : '10001';
-            element.style.position = computedStyle.position === 'fixed' ? 'fixed' : 'relative';
-          }, 300);
         }, 100);
       }
-    }
+      
+      // Atualiza cutout após um delay para garantir que o elemento está renderizado
+      setTimeout(() => {
+        const newRect = element.getBoundingClientRect();
+        const cutout = overlay?.querySelector('.tutorial-cutout');
+        if (cutout && newRect.width > 0 && newRect.height > 0) {
+          cutout.style.top = `${newRect.top - padding}px`;
+          cutout.style.left = `${newRect.left - padding}px`;
+          cutout.style.width = `${newRect.width + (padding * 2)}px`;
+          cutout.style.height = `${newRect.height + (padding * 2)}px`;
+        }
+        
+        // Garante z-index correto após atualização
+        if (isFAB) {
+          element.style.zIndex = '10002';
+        } else if (isBottomNavItem) {
+          const bottomNav = element.closest('.bottom-nav');
+          if (bottomNav) {
+            bottomNav.style.zIndex = '10001';
+          }
+          element.style.zIndex = '10002';
+        }
+      }, 300);
+    });
   }
 
   /**
@@ -367,7 +516,21 @@ class TutorialView {
           el.style.zIndex = '';
           el.style.position = '';
           el.style.filter = '';
+          el.style.transform = '';
+          el.style.background = '';
+          el.style.borderRadius = '';
+          el.style.padding = '';
+          el.style.display = '';
+          el.style.visibility = '';
+          el.style.opacity = '';
         });
+        
+        // Restaura bottom-nav
+        const bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+          bottomNav.style.zIndex = '';
+          bottomNav.style.position = '';
+        }
         
         // Remove cutout
         const cutout = document.querySelector('.tutorial-cutout');

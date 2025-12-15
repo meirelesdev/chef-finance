@@ -1171,13 +1171,46 @@ body.tutorial-open .tutorial-highlight {
 }
 
 /* Para elementos fixos (como bottom-nav) */
-body.tutorial-open .bottom-nav .tutorial-highlight,
+body.tutorial-open .bottom-nav {
+  z-index: 10001 !important;
+  position: fixed !important;
+}
+
+/* FAB destacado */
 body.tutorial-open .fab.tutorial-highlight,
+body.tutorial-open #fab-new-event.tutorial-highlight {
+  z-index: 10002 !important;
+  position: fixed !important;
+  left: 50% !important;
+  bottom: 35px !important;
+  transform: translateX(-50%) scale(1.1) !important; /* Mantém centralização e aumenta */
+  filter: brightness(1.4) drop-shadow(0 0 30px rgba(233, 30, 99, 1)) !important;
+  box-shadow: 
+    0 0 0 4px rgba(233, 30, 99, 0.5),
+    0 0 0 8px rgba(233, 30, 99, 0.3),
+    0 8px 32px rgba(233, 30, 99, 0.6) !important;
+  border: 4px solid rgba(233, 30, 99, 0.8) !important;
+  background: var(--color-primary) !important;
+}
+
+/* Bottom nav items destacados */
+body.tutorial-open .bottom-nav .tutorial-highlight,
 body.tutorial-open .bottom-nav-item.tutorial-highlight {
   z-index: 10002 !important;
   position: relative !important;
-  filter: brightness(1.25) drop-shadow(0 0 20px rgba(233, 30, 99, 1)) !important;
+  filter: brightness(1.3) drop-shadow(0 0 25px rgba(233, 30, 99, 1)) !important;
   background: rgba(255, 255, 255, 1) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Garante que o botão de ajustes seja visível */
+body.tutorial-open .bottom-nav-item[data-view="settings"].tutorial-highlight {
+  background: rgba(255, 255, 255, 1) !important;
+  border-radius: 12px !important;
+  padding: 8px 12px !important;
+  box-shadow: 
+    0 0 0 4px rgba(233, 30, 99, 0.5),
+    0 4px 20px rgba(233, 30, 99, 0.4) !important;
 }
 
 /* Cutout no overlay para deixar elemento visível */
